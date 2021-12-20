@@ -1,15 +1,14 @@
 const https = require('https');
 const fs = require('fs');
 
-const userName = 'sangha-test-candidate2021';
-const password = 'SaSNNfUkuXLKhrxRMvuv';
-var auth = "Basic " + new Buffer(userName + ":" + password).toString("base64");
+var authBitBucket = "Basic " + new Buffer('sangha-test-candidate2021' + ":" + 'SaSNNfUkuXLKhrxRMvuv').toString("base64");
+var authAzure = "Basic " + new Buffer('sangha-test-candidate' + ":" + 'hkj87H8h^g$fh34').toString("base64");
 var myStr;
 var gitBranchData;
 
-const options = {
+const optionsBranchJson = {
     headers: {
-        "Authorization": auth,
+        "Authorization": authBitBucket,
         'Content-Type': 'application/json'
     },
     hostname: 'api.bitbucket.org',
@@ -18,17 +17,38 @@ const options = {
     method: 'GET'
 }
 
-const options2 = {
+const optionsFileDownloader = {
     headers: {
-        "Authorization": auth,
+        "Authorization": authBitBucket,
     },
     hostname: 'bitbucket.org',
     // port: 443,
-    //path: '/myquestcoteam/candidate-test-nodejs-2021/get/5f260e23e000ec62667e476b08add431a12623e8.tar.gz',
+    //path: < Will be set later >
     method: 'GET'
 }
 
-const req = https.request(options, res => {
+const optionsAzurePoster = {
+    headers: {
+        "Authorization": authAzure,
+    },
+    hostname: 'sangha-test-candidate-nodejs2021.scm.azurewebsites.net',
+    // port: 443,
+    path: '/api/zipdeploy',
+    method: 'POST'
+}
+
+const options = {
+    method: "POST",
+    headers: {
+        "Authorization": authAzure,
+        "Content-Type": "multipart/form-data"
+    },
+    formData : {
+        "zip" : fs.createReadStream("branch-zayne_arnold.tar.gz")
+    }
+};
+
+const req = https.request(optionsBranchJson, res => {
 
     // pump data into string asynchronously
     res.on('data', function (chunk) {
@@ -54,16 +74,22 @@ const req = https.request(options, res => {
 
         var branchName = gitBranchData[gitBranchData.length - 1].name; // set to last json item
         var branchHash = gitBranchData[gitBranchData.length - 1].target.hash; // set to last json item
-        options2.path = '/myquestcoteam/candidate-test-nodejs-2021/get/' + branchHash + '.tar.gz';
+        optionsFileDownloader.path = '/myquestcoteam/candidate-test-nodejs-2021/get/' + branchHash + '.tar.gz';
 
         const file = fs.createWriteStream('branch-' + branchName + '.tar.gz');
-        const request = https.get(options2, function(response) {
-        // const request = https.get("https://sangha-test-candidate2021:SaSNNfUkuXLKhrxRMvuv@bitbucket.org/myquestcoteam/candidate-test-nodejs-2021/get/5f260e23e000ec62667e476b08add431a12623e8.tar.gz", function(response) {
+        const request = https.get(optionsFileDownloader, function(response) {
           response.pipe(file);
+
         });
+
+
+        // fs.createReadStream(branchName+'.tar.gz').pipe(request.put('http://localhost:8888/foo.xpi'));
+        
     });
 
 })
+
+
 
 req.on('error', error => {
     console.error(error);
