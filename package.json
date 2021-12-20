@@ -1,0 +1,8 @@
+{
+    "name": "deployment application",
+    "version": "1.0.0",
+    "description": "Deployment application Test app",
+    "author": "Boaz Ron (myQuest.co) & friends",
+    "private": true,
+    "main": "app.js"
+}
